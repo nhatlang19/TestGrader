@@ -1,5 +1,7 @@
 package BubbleSheetScanner;
 
+
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
@@ -8,25 +10,7 @@ import org.opencv.imgproc.Imgproc;
 import org.opencv.imgproc.Moments;
 
 public class PerspectiveTransform {
-	private Mat warped;
-	private Mat gray;
-	MatOfPoint2f approxCurve;
-	
-	public PerspectiveTransform(Mat gray, MatOfPoint2f approxCurve) {
-		this.warped = new Mat();
-		this.gray = gray;
-		this.approxCurve = approxCurve;
-	}
-	
-	public Mat getWarped() {
-		return warped;
-	}
-
-	public void setWarped(Mat warped) {
-		this.warped = warped;
-	}
-
-	private Point[] orderPoints() {
+	private static Point[] orderPoints(MatOfPoint2f approxCurve) {
 		// calculate the center of mass of our contour image using moments
 		Moments moment = Imgproc.moments(approxCurve.col(0));
 		int x = (int) (moment.get_m10() / moment.get_m00());
@@ -59,8 +43,8 @@ public class PerspectiveTransform {
 		return sortedPoints;
 	}
 	
-	public void transform() {
-		Point[] sortedPoints = orderPoints();
+	public static Mat transform(Mat gray, MatOfPoint2f approxCurve) {
+		Point[] sortedPoints = orderPoints(approxCurve);
 		
 		Point bl = sortedPoints[0];
 		Point br = sortedPoints[1];
@@ -70,12 +54,10 @@ public class PerspectiveTransform {
 		double widthA = Math.sqrt(Math.pow(br.x - bl.x, 2) + Math.pow(br.y - bl.y, 2));
 		double widthB = Math.sqrt(Math.pow(tr.x - tl.x, 2) + Math.pow(tr.y - tl.y, 2));
 		int maxWidth = (int) Math.max(widthA, widthB);
-		System.out.println(maxWidth);
 
 		double heightA = Math.sqrt(Math.pow(tr.x - br.x, 2) + Math.pow(tr.y - br.y, 2));
 		double heightB = Math.sqrt(Math.pow(tl.x - bl.x, 2) + Math.pow(tl.y - bl.y, 2));
 		int maxHeight = (int) Math.max(heightA, heightB);
-		System.out.println(maxHeight);
 
 		MatOfPoint2f src = new MatOfPoint2f(sortedPoints[0], sortedPoints[1], sortedPoints[2], sortedPoints[3]);
 
@@ -84,7 +66,10 @@ public class PerspectiveTransform {
 		
 		Mat warpMat = Imgproc.getPerspectiveTransform(src, dst);
 		
+		Mat warped = new Mat(gray.rows(), gray.cols(), CvType.CV_8UC3);
 		Imgproc.warpPerspective(gray, warped, warpMat, new Size(maxWidth, maxHeight));
-		Utils.write("output/2_perspective.jpg", warped);
+		Utils.write("output/3_perspective_transform.jpg", warped);
+		
+		return warped;
 	}
 }

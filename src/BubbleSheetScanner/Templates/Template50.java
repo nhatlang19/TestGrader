@@ -33,8 +33,8 @@ public class Template50 extends AbstractTemplate{
 				// Get bounding rect of contour
 				Rect rect = Imgproc.boundingRect(points);
 				System.out.println(rect.area());
-				approxCurveMax = approxCurve;
-				contourIdxMax = contourIdx;
+				this.setApproxCurveMax(approxCurve);
+				this.setContourIdxMax(contourIdx);
 				break;
 			}
 		}

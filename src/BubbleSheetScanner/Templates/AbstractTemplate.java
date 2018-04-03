@@ -6,8 +6,24 @@ import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 
 abstract public class AbstractTemplate {
-	public int contourIdxMax;
-	public MatOfPoint2f approxCurveMax = new MatOfPoint2f();
+	private int contourIdxMax;
+	private MatOfPoint2f approxCurveMax = new MatOfPoint2f();
+	
+	public int getContourIdxMax() {
+		return contourIdxMax;
+	}
+
+	public void setContourIdxMax(int contourIdxMax) {
+		this.contourIdxMax = contourIdxMax;
+	}
+
+	public MatOfPoint2f getApproxCurveMax() {
+		return approxCurveMax;
+	}
+
+	public void setApproxCurveMax(MatOfPoint2f approxCurveMax) {
+		this.approxCurveMax = approxCurveMax;
+	}
 
 	public abstract void findAllRectArea(List<MatOfPoint> contourList);
 	

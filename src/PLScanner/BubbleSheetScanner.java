@@ -1,11 +1,18 @@
 package PLScanner;
 
+import java.util.List;
+
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 
 import BubbleSheetScanner.Binarize;
 import BubbleSheetScanner.DetectResource;
+import BubbleSheetScanner.FilterCircle;
+import BubbleSheetScanner.FilterQuestions;
+import BubbleSheetScanner.HandleResult;
 import BubbleSheetScanner.PerspectiveTransform;
+import BubbleSheetScanner.Question;
 import BubbleSheetScanner.Templates.AbstractTemplate;
 
 public class BubbleSheetScanner {
@@ -17,15 +24,23 @@ public class BubbleSheetScanner {
 		detectResource = new DetectResource(sourceFile, template);
 	}
 	
-	public void scan() {
+	public void scanTopic() {
 		this.detectResource.detect();
 		
-		Mat gray = this.detectResource.getGray();
-		MatOfPoint2f approxCurve = this.detectResource.getTemplate().approxCurveMax;
-		PerspectiveTransform perspectiveTransform = new PerspectiveTransform(gray, approxCurve);
-		perspectiveTransform.transform();
+		MatOfPoint2f approxCurve = this.detectResource.getApproxCurveMax();
+		Mat wrapped = PerspectiveTransform.transform(this.detectResource.getGray(), approxCurve);
+		Mat paper = PerspectiveTransform.transform(this.detectResource.getSrc(), approxCurve);
 		
-		Binarize binarize = new Binarize(perspectiveTransform.getWarped());
-		binarize.threshold();
+		Mat thresh = Binarize.threshold(wrapped);
+		
+		List<MatOfPoint> questionCnts = FilterCircle.filter(thresh);
+		questionCnts = FilterCircle.sortContours(thresh, questionCnts);
+		
+		List<Question> questions = FilterQuestions.get(paper, questionCnts);
+		HandleResult.handle(thresh, paper, questions);
+	}
+	
+	public void scanExamStudents() {
+		
 	}
 }

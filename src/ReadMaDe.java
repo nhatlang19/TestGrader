@@ -15,6 +15,8 @@ import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.*;
 
+import BubbleSheetScanner.PerspectiveTransform;
+
 public class ReadMaDe {
 
 	public static void main(String[] args) {

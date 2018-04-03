@@ -6,7 +6,7 @@ import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
-public class HelloCV {
+public class Test {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub

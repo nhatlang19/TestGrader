@@ -17,6 +17,9 @@ import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.*;
 
+import BubbleSheetScanner.PerspectiveTransform;
+import BubbleSheetScanner.Question;
+
 public class TestGrader {
 
 	private static void cleanOutput() {
@@ -44,7 +47,7 @@ public class TestGrader {
 		String nameFile = "test3";
 		String sourceFileName = "images/" + nameFile + ".png";
 		// read images
-		Mat sourceMat = Imgcodecs.imread(sourceFileName, Imgcodecs.IMREAD_ANYCOLOR);
+		Mat sourceMat = Imgcodecs.imread(sourceFileName);
 		System.out.println("width, height = " + sourceMat.width() + ", " + sourceMat.height());
 
 		Mat gray = new Mat(sourceMat.rows(), sourceMat.cols(), CvType.CV_8UC3);
@@ -217,7 +220,6 @@ public class TestGrader {
 		}
 		write("output/" + nameFile + "_9_get_questions.jpg", paper);
 
-		List<Integer> hm = new ArrayList<>();
 		List<Integer> answers = getAnswerKey();
 		int idx = 0;
 		int correct = 0;

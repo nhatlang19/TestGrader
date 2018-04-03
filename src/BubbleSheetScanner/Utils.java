@@ -1,5 +1,6 @@
 package BubbleSheetScanner;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.opencv.core.Mat;
@@ -29,29 +30,14 @@ public class Utils {
 		return contourList;
 	}
 	
-	public static void sortContoures(List<MatOfPoint> cnts, String method)
+	public static List<Integer> getAnswerKey()
 	{
-//		def sort_contours(cnts, method="left-to-right"):
-//			# initialize the reverse flag and sort index
-//			reverse = False
-//			i = 0
-//		 
-//			# handle if we need to sort in reverse
-//			if method == "right-to-left" or method == "bottom-to-top":
-//				reverse = True
-//		 
-//			# handle if we are sorting against the y-coordinate rather than
-//			# the x-coordinate of the bounding box
-//			if method == "top-to-bottom" or method == "bottom-to-top":
-//				i = 1
-//		 
-//			# construct the list of bounding boxes and sort them from top to
-//			# bottom
-//			boundingBoxes = [cv2.boundingRect(c) for c in cnts]
-//			(cnts, boundingBoxes) = zip(*sorted(zip(cnts, boundingBoxes),
-//				key=lambda b:b[1][i], reverse=reverse))
-//		 
-//			# return the list of sorted contours and bounding boxes
-//			return (cnts, boundingBoxes)
+		List<Integer> answers = new ArrayList<>();
+		answers.add(1);
+		answers.add(4);
+		answers.add(0);
+		answers.add(3);
+		answers.add(1);
+		return answers;
 	}
 }
