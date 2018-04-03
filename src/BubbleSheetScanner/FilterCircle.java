@@ -16,7 +16,7 @@ import org.opencv.imgproc.Imgproc;
 import org.opencv.imgproc.Moments;
 
 public class FilterCircle {
-	public static List<MatOfPoint> filter(Mat thresh) {
+	public static List<MatOfPoint> filterCircleAnswers(Mat thresh) {
 		List<MatOfPoint> questionCnts = new ArrayList<>();
 		List<MatOfPoint> cnts = new ArrayList<>();
 		Imgproc.findContours(thresh, cnts, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);

@@ -33,7 +33,7 @@ public class BubbleSheetScanner {
 		
 		Mat thresh = Binarize.threshold(wrapped);
 		
-		List<MatOfPoint> questionCnts = FilterCircle.filter(thresh);
+		List<MatOfPoint> questionCnts = FilterCircle.filterCircleAnswers(thresh);
 		questionCnts = FilterCircle.sortContours(thresh, questionCnts);
 		
 		List<Question> questions = FilterQuestions.get(paper, questionCnts);
