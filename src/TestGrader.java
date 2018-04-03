@@ -2,6 +2,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 
 import org.opencv.core.Core;
@@ -16,30 +17,27 @@ import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.*;
 
-public class Hello {
-	
+public class TestGrader {
+
 	private static void cleanOutput() {
 		File directory = new File("output/");
 
 		// Get all files in directory
 
 		File[] files = directory.listFiles();
-		for (File file : files)
-		{
-		   // Delete each file
+		for (File file : files) {
+			// Delete each file
 
-		   if (!file.delete())
-		   {
-		       // Failed to delete file
-		       System.out.println("Failed to delete "+file);
-		   }
-		} 
+			if (!file.delete()) {
+				// Failed to delete file
+				System.out.println("Failed to delete " + file);
+			}
+		}
 	}
 
 	public static void main(String[] args) {
 		cleanOutput();
-		
-		
+
 		// TODO Auto-generated method stub
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 
@@ -112,7 +110,7 @@ public class Hello {
 		///////////////////////// STEP 2 /////////////////////////////
 		Mat warped = PerspectiveTransform.transform(gray, approxCurveMax);
 		write("output/" + nameFile + "_4_transform.jpg", warped);
-		
+
 		Mat paper = PerspectiveTransform.transform(sourceMat, approxCurveMax);
 		write("output/" + nameFile + "_4_transform_paper.jpg", paper);
 
@@ -121,67 +119,65 @@ public class Hello {
 		Mat thresh = new Mat(warped.rows(), warped.cols(), CvType.CV_8UC3);
 		Imgproc.threshold(warped, thresh, 0, 255, Imgproc.THRESH_BINARY_INV | Imgproc.THRESH_OTSU);
 		write("output/" + nameFile + "_5_binarize.jpg", thresh);
-		
+
 		List<MatOfPoint> questionCnts = new ArrayList<>();
 		List<MatOfPoint> cnts = new ArrayList<>();
 		Imgproc.findContours(thresh, cnts, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
-		
+
 		Mat copy3 = new Mat(thresh.rows(), thresh.cols(), CvType.CV_8UC3);
 		for (int contourIdx = 0; contourIdx < cnts.size(); contourIdx++) {
 			final MatOfPoint contour = cnts.get(contourIdx);
 			final Rect bb = Imgproc.boundingRect(contour);
-			float ar = bb.width / (float)bb.height;
-			
+			float ar = bb.width / (float) bb.height;
+
 			System.out.println("width:" + bb.width + ",height: " + bb.height + ",ar: " + ar);
 			if (bb.width >= 34 && bb.height >= 34 && ar >= 0.9 && ar <= 1.1) {
 				questionCnts.add(contour);
-				Imgproc.drawContours(copy3, cnts, contourIdx, new Scalar(0,0,255), 1);
+				Imgproc.drawContours(copy3, cnts, contourIdx, new Scalar(0, 0, 255), 1);
 			}
 		}
 		write("output/" + nameFile + "_6_find_circle.jpg", copy3);
 		System.out.println(questionCnts.size());
-		
+
 		Mat copy4 = new Mat(thresh.rows(), thresh.cols(), CvType.CV_8UC3);
 		int count = 0;
-		for(int q = 0;q<questionCnts.size();q++) {
+		for (int q = 0; q < questionCnts.size(); q++) {
 			final MatOfPoint contour = questionCnts.get(q);
 			MatOfPoint2f contour2f = new MatOfPoint2f(contour.toArray());
 			Moments moment = Imgproc.moments(contour2f.col(0));
 			int cX = (int) (moment.get_m10() / moment.get_m00());
 			int cY = (int) (moment.get_m01() / moment.get_m00());
-			
+
 			final Rect bb = Imgproc.boundingRect(questionCnts.get(q));
-			System.out.print(bb.tl());
-			System.out.println(bb.br());
-			Imgproc.drawContours(copy4, questionCnts, q, new Scalar(0,0,255), 1);
-			Imgproc.putText(copy4, ++count + "", new Point(cX - 20, cY), Core.FONT_HERSHEY_SIMPLEX,
-					0.5, new Scalar(255, 255, 255), 2);
+			Imgproc.drawContours(copy4, questionCnts, q, new Scalar(0, 0, 255), 1);
+			Imgproc.putText(copy4, ++count + "", new Point(cX - 20, cY), Core.FONT_HERSHEY_SIMPLEX, 0.5,
+					new Scalar(255, 255, 255), 2);
 		}
 		write("output/" + nameFile + "_7_number.jpg", copy4);
-		
-		
+
 		Collections.reverse(questionCnts); // @TODO: need to improve in here
-		
+
 		Mat copy5 = new Mat(thresh.rows(), thresh.cols(), CvType.CV_8UC3);
 		count = 0;
-		for(int q = 0;q<questionCnts.size();q++) {
+		for (int q = 0; q < questionCnts.size(); q++) {
 			final MatOfPoint contour = questionCnts.get(q);
 			MatOfPoint2f contour2f = new MatOfPoint2f(contour.toArray());
 			Moments moment = Imgproc.moments(contour2f.col(0));
 			int cX = (int) (moment.get_m10() / moment.get_m00());
 			int cY = (int) (moment.get_m01() / moment.get_m00());
-			
+
 			final Rect bb = Imgproc.boundingRect(questionCnts.get(q));
-			System.out.print(bb.tl());
-			System.out.println(bb.br());
-			Imgproc.drawContours(copy5, questionCnts, q, new Scalar(0,0,255), 1);
-			Imgproc.putText(copy5, ++count + "", new Point(cX - 20, cY), Core.FONT_HERSHEY_SIMPLEX,
-					0.5, new Scalar(255, 255, 255), 2);
+			Imgproc.drawContours(copy5, questionCnts, q, new Scalar(0, 0, 255), 1);
+			Imgproc.putText(copy5, ++count + "", new Point(cX - 20, cY), Core.FONT_HERSHEY_SIMPLEX, 0.5,
+					new Scalar(255, 255, 255), 2);
 		}
 		write("output/" + nameFile + "_8_number_after_sort.jpg", copy5);
-		
+
 		int index = 0;
-		for(int q = 0;q<questionCnts.size();q+=5) {
+
+		List<Question> questions = new ArrayList<>();
+
+		for (int q = 0; q < questionCnts.size(); q += 5) {
 			Scalar scalar = null;
 			switch (index) {
 			case 0:
@@ -202,18 +198,57 @@ public class Hello {
 			default:
 				break;
 			}
-			
-			Imgproc.drawContours(paper, questionCnts, q, scalar, 2);
-			Imgproc.drawContours(paper, questionCnts, q+1, scalar, 2);
-			Imgproc.drawContours(paper, questionCnts, q+2, scalar, 2);
-			Imgproc.drawContours(paper, questionCnts, q+3, scalar, 2);
-			Imgproc.drawContours(paper, questionCnts, q+4, scalar, 2);
+
+//			Imgproc.drawContours(paper, questionCnts, q, scalar, 1);
+//			Imgproc.drawContours(paper, questionCnts, q + 1, scalar, 1);
+//			Imgproc.drawContours(paper, questionCnts, q + 2, scalar, 1);
+//			Imgproc.drawContours(paper, questionCnts, q + 3, scalar, 1);
+//			Imgproc.drawContours(paper, questionCnts, q + 4, scalar, 1);
+
+			Question question = new Question();
+			question.add(questionCnts.get(q));
+			question.add(questionCnts.get(q + 1));
+			question.add(questionCnts.get(q + 2));
+			question.add(questionCnts.get(q + 3));
+			question.add(questionCnts.get(q + 4));
+			questions.add(question);
+
 			index++;
-			
 		}
 		write("output/" + nameFile + "_9_get_questions.jpg", paper);
+
+		List<Integer> hm = new ArrayList<>();
+		List<Integer> answers = getAnswerKey();
+		int idx = 0;
+		int correct = 0;
+		for (Question question : questions) {
+			int k = 0;
+			int bubbleTotal = 0;
+			for (int i = 0; i < question.cnts.size(); i++) {
+				Mat mask = Mat.zeros(thresh.rows(), thresh.cols(), CvType.CV_8U);
+				Imgproc.drawContours(mask, question.cnts, i, new Scalar(255, 255, 255), -1);
+//				write("output/" + nameFile + "_10_" + i + ".jpg", mask);
+				Core.bitwise_and(thresh, thresh, mask, mask);
+				int total = Core.countNonZero(mask);
+				if (total > bubbleTotal) {
+					bubbleTotal = total;
+					k = i;
+				}
+			}
+			
+			Scalar scalar = new Scalar(0, 0, 255);
+			if (answers.get(idx++) == k) {
+				scalar = new Scalar(0, 255, 0);
+				correct += 1;
+			}
+			Imgproc.drawContours(paper, question.cnts, k, scalar, 2);
+		}
 		
-		
+		float score = (float) ((correct / 5.0) * 100);
+		Imgproc.putText(paper, String.format("%.2f", score) + "%", new Point(10, 30),
+				Core.FONT_HERSHEY_SIMPLEX, 0.9, new Scalar(0, 0, 255), 2);
+		write("output/" + nameFile + "_10_result.jpg", paper);
+
 		sourceMat.release();
 		gray.release();
 		blurred.release();
@@ -225,6 +260,17 @@ public class Hello {
 		copy3.release();
 		copy4.release();
 		copy5.release();
+	}
+	
+	private static List<Integer> getAnswerKey()
+	{
+		List<Integer> answers = new ArrayList<>();
+		answers.add(1);
+		answers.add(4);
+		answers.add(0);
+		answers.add(3);
+		answers.add(1);
+		return answers;
 	}
 
 	private static void write(String output, Mat source) {
