@@ -32,15 +32,24 @@ public class BubbleSheetScanner {
 		Mat paper = PerspectiveTransform.transform(this.detectResource.getSrc(), approxCurve);
 		
 		Mat thresh = Binarize.threshold(wrapped);
-		
-		List<MatOfPoint> questionCnts = FilterCircle.filterCircleAnswers(thresh);
-		questionCnts = FilterCircle.sortContours(thresh, questionCnts);
-		
-		List<Question> questions = FilterQuestions.get(paper, questionCnts);
-		HandleResult.handle(thresh, paper, questions);
+//		List<MatOfPoint> questionCnts = FilterCircle.filterCircleAnswers(thresh);
+//		questionCnts = FilterCircle.sortContours(thresh, questionCnts);
+//		
+//		List<Question> questions = FilterQuestions.get(paper, questionCnts);
+//		HandleResult.handle(thresh, paper, questions);
 	}
 	
 	public void scanExamStudents() {
+		this.detectResource.detect();
 		
+		MatOfPoint2f approxCurve = this.detectResource.getApproxCurveMax();
+		Mat wrapped = PerspectiveTransform.transform(this.detectResource.getGray(), approxCurve);
+		Mat paper = PerspectiveTransform.transform(this.detectResource.getSrc(), approxCurve);
+		
+		Mat thresh = Binarize.threshold(wrapped);
+		List<MatOfPoint> questionCnts = FilterCircle.filterCircleTopic(thresh);
+		questionCnts = FilterCircle.sortContours(thresh, questionCnts);
+		
+		List<Question> questions = FilterQuestions.getTopic(paper, questionCnts);
 	}
 }

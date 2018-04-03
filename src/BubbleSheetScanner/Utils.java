@@ -1,5 +1,6 @@
 package BubbleSheetScanner;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,5 +40,21 @@ public class Utils {
 		answers.add(3);
 		answers.add(1);
 		return answers;
+	}
+	
+	public static void cleanOutput() {
+		File directory = new File("output/");
+
+		// Get all files in directory
+
+		File[] files = directory.listFiles();
+		for (File file : files) {
+			// Delete each file
+
+			if (!file.delete()) {
+				// Failed to delete file
+				System.out.println("Failed to delete " + file);
+			}
+		}
 	}
 }

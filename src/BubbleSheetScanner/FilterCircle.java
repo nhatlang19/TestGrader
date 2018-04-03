@@ -39,6 +39,34 @@ public class FilterCircle {
 		return questionCnts;
 	}
 	
+	public static List<MatOfPoint> filterCircleTopic(Mat thresh) {
+		List<MatOfPoint> questionCnts = new ArrayList<>();
+		List<MatOfPoint> cnts = new ArrayList<>();
+		Imgproc.findContours(thresh, cnts, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
+
+		Mat copy3 = new Mat(thresh.rows(), thresh.cols(), CvType.CV_8UC3);
+		for (int contourIdx = 0; contourIdx < cnts.size(); contourIdx++) {
+			final MatOfPoint contour = cnts.get(contourIdx);
+			final Rect bb = Imgproc.boundingRect(contour);
+			float ar = bb.width / (float)bb.height;
+			MatOfPoint2f contour2f = new MatOfPoint2f(contour.toArray());
+			double approxDistance = Imgproc.arcLength(contour2f, true) * 0.02;
+			MatOfPoint2f approxCurve = new MatOfPoint2f();
+			Imgproc.approxPolyDP(contour2f, approxCurve, approxDistance, true);
+			System.out.println("-- (" + bb.width + "," + bb.height + "), ar: " + ar);
+			if (approxCurve.toArray().length != 4 && bb.width >= 18 && bb.height >= 18 && ar >= 0.9 && ar <= 1.2) {
+				System.out.println("(" + bb.width + "," + bb.height + "), ar: " + ar);
+				questionCnts.add(contour);
+				Imgproc.drawContours(copy3, cnts, contourIdx, new Scalar(0,0,255), 1);
+			}
+		}
+		
+		Utils.write("output/5_find_circle.jpg", copy3);
+		copy3.release();
+		System.out.println("Count topic circle: " + questionCnts.size());
+		return questionCnts;
+	}
+	
 	public static List<MatOfPoint> sortContours(Mat thresh, List<MatOfPoint> questionCnts) {
 		Mat copy4 = new Mat(thresh.rows(), thresh.cols(), CvType.CV_8UC3);
 		int count = 0;
