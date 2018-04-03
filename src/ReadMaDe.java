@@ -1,4 +1,3 @@
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -16,35 +15,14 @@ import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.*;
 
-public class Hello {
-	
-	private static void cleanOutput() {
-		File directory = new File("output/");
-
-		// Get all files in directory
-
-		File[] files = directory.listFiles();
-		for (File file : files)
-		{
-		   // Delete each file
-
-		   if (!file.delete())
-		   {
-		       // Failed to delete file
-		       System.out.println("Failed to delete "+file);
-		   }
-		} 
-	}
+public class ReadMaDe {
 
 	public static void main(String[] args) {
-		cleanOutput();
-		
-		
 		// TODO Auto-generated method stub
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 
-		String nameFile = "test3";
-		String sourceFileName = "images/" + nameFile + ".png";
+		String nameFile = "test4";
+		String sourceFileName = "images/" + nameFile + ".jpg";
 		// read images
 		Mat sourceMat = Imgcodecs.imread(sourceFileName, Imgcodecs.IMREAD_ANYCOLOR);
 		System.out.println("width, height = " + sourceMat.width() + ", " + sourceMat.height());
@@ -112,7 +90,6 @@ public class Hello {
 		///////////////////////// STEP 2 /////////////////////////////
 		Mat warped = PerspectiveTransform.transform(gray, approxCurveMax);
 		write("output/" + nameFile + "_4_transform.jpg", warped);
-		
 		Mat paper = PerspectiveTransform.transform(sourceMat, approxCurveMax);
 		write("output/" + nameFile + "_4_transform_paper.jpg", paper);
 
@@ -131,15 +108,18 @@ public class Hello {
 			final MatOfPoint contour = cnts.get(contourIdx);
 			final Rect bb = Imgproc.boundingRect(contour);
 			float ar = bb.width / (float)bb.height;
-			
-			System.out.println("width:" + bb.width + ",height: " + bb.height + ",ar: " + ar);
-			if (bb.width >= 34 && bb.height >= 34 && ar >= 0.9 && ar <= 1.1) {
+			MatOfPoint2f contour2f = new MatOfPoint2f(contour.toArray());
+			double approxDistance = Imgproc.arcLength(contour2f, true) * 0.02;
+			MatOfPoint2f approxCurve = new MatOfPoint2f();
+			Imgproc.approxPolyDP(contour2f, approxCurve, approxDistance, true);
+			System.out.println("-- (" + bb.width + "," + bb.height + "), ar: " + ar);
+			if (approxCurve.toArray().length != 4 && bb.width >= 18 && bb.height >= 18 && ar >= 0.9 && ar <= 1.2) {
+				System.out.println("(" + bb.width + "," + bb.height + "), ar: " + ar);
 				questionCnts.add(contour);
 				Imgproc.drawContours(copy3, cnts, contourIdx, new Scalar(0,0,255), 1);
 			}
 		}
 		write("output/" + nameFile + "_6_find_circle.jpg", copy3);
-		System.out.println(questionCnts.size());
 		
 		Mat copy4 = new Mat(thresh.rows(), thresh.cols(), CvType.CV_8UC3);
 		int count = 0;
@@ -154,11 +134,10 @@ public class Hello {
 			System.out.print(bb.tl());
 			System.out.println(bb.br());
 			Imgproc.drawContours(copy4, questionCnts, q, new Scalar(0,0,255), 1);
-			Imgproc.putText(copy4, ++count + "", new Point(cX - 20, cY), Core.FONT_HERSHEY_SIMPLEX,
+			Imgproc.putText(copy4, ++count + "", new Point(cX - 5, cY), Core.FONT_HERSHEY_SIMPLEX,
 					0.5, new Scalar(255, 255, 255), 2);
 		}
 		write("output/" + nameFile + "_7_number.jpg", copy4);
-		
 		
 		Collections.reverse(questionCnts); // @TODO: need to improve in here
 		
@@ -175,13 +154,13 @@ public class Hello {
 			System.out.print(bb.tl());
 			System.out.println(bb.br());
 			Imgproc.drawContours(copy5, questionCnts, q, new Scalar(0,0,255), 1);
-			Imgproc.putText(copy5, ++count + "", new Point(cX - 20, cY), Core.FONT_HERSHEY_SIMPLEX,
+			Imgproc.putText(copy5, ++count + "", new Point(cX - 5, cY), Core.FONT_HERSHEY_SIMPLEX,
 					0.5, new Scalar(255, 255, 255), 2);
 		}
 		write("output/" + nameFile + "_8_number_after_sort.jpg", copy5);
 		
 		int index = 0;
-		for(int q = 0;q<questionCnts.size();q+=5) {
+		for(int q = 0;q<questionCnts.size();q+=3) {
 			Scalar scalar = null;
 			switch (index) {
 			case 0:
@@ -193,38 +172,15 @@ public class Hello {
 			case 2:
 				scalar = new Scalar(0, 255, 0);
 				break;
-			case 3:
-				scalar = new Scalar(255, 0, 255);
-				break;
-			case 4:
-				scalar = new Scalar(0, 255, 255);
-				break;
-			default:
-				break;
 			}
 			
 			Imgproc.drawContours(paper, questionCnts, q, scalar, 2);
 			Imgproc.drawContours(paper, questionCnts, q+1, scalar, 2);
 			Imgproc.drawContours(paper, questionCnts, q+2, scalar, 2);
-			Imgproc.drawContours(paper, questionCnts, q+3, scalar, 2);
-			Imgproc.drawContours(paper, questionCnts, q+4, scalar, 2);
 			index++;
 			
 		}
 		write("output/" + nameFile + "_9_get_questions.jpg", paper);
-		
-		
-		sourceMat.release();
-		gray.release();
-		blurred.release();
-		edged.release();
-		warped.release();
-		thresh.release();
-		copy.release();
-		copy2.release();
-		copy3.release();
-		copy4.release();
-		copy5.release();
 	}
 
 	private static void write(String output, Mat source) {
